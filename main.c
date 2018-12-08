@@ -1,3 +1,6 @@
+//SÜMEYRA GÜLSOY 150114028
+//SABRİYE KÖYMEN 150114081
+
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
@@ -8,7 +11,8 @@
 #include <signal.h>
 #include <fcntl.h>
 #define MAX_LINE 80 /* 80 chars per line, per command, should be enough. */
-
+//#define CREATE_FLAGS (O_WRONLY | O_CREAT | O_APPEND )
+//#define CREATE_MODE (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)
 #define MAX_PRESSES 1
 static int pressCount = 0;
 void catchCtrlZ(int signalNbr)
@@ -150,6 +154,134 @@ void findNode(struct Node *node,char alias[],char command[] ){
     }
 }
 
+/* void redirection1(char file[]){//> operation
+
+		int fd;
+
+		fd = open(file, CREATE_FLAGS, CREATE_MODE);
+
+		if (fd == -1) {
+			perror("Failed to open my.file");
+			return ;
+		}
+
+		if (dup2(fd, STDOUT_FILENO) == -1) {
+			perror("Failed to redirect standard output");
+			return ;
+		}
+
+		if (close(fd) == -1) {
+			perror("Failed to close the file");
+			return ;
+		}
+
+		//printf("Output will be seen in my.file\n");
+
+		execl("/bin/ls","ls",NULL);
+}
+
+void redirection2(char file[]){//< operation
+	int fd;
+
+	fd = open(file, CREATE_FLAGS, CREATE_MODE);
+
+	if (fd == -1) {
+		perror("Failed to open my.file");
+		return ;
+	}
+
+	if (dup2(fd, STDIN_FILENO) == -1) {
+		perror("Failed to redirect standard input");
+		return ;
+	}
+
+	if (close(fd) == -1) {
+		perror("Failed to close the file");
+		return ;
+	}
+
+	//printf("Output will be seen in my.file\n");
+
+	execl("/bin/sort","sort","-n","+4",NULL);
+}
+
+void redirection3(char file[]){//2>
+	int fd;
+
+	fd = open(file, O_CREAT|O_APPEND|O_WRONLY,0600);
+
+	if (fd == -1) {
+		perror("Failed to open my.file");
+		return ;
+	}
+
+	if (dup2(fd,STDERR_FILENO) == -1) {
+		perror("Failed to redirect standard error");
+		return ;
+	}
+
+	if (close(fd) == -1) {
+		perror("Failed to close the file");
+		return ;
+	}
+
+	//printf("Output will be seen in my.file\n");
+
+	execl("/bin","drdr",NULL);
+}
+
+void redirection4(char file1[],char file2[]){ // < >
+
+int fd1,fd2;
+fd1=open(file1, O_RDONLY, 0600);
+fd2=open(file2, O_WRONLY | O_CREAT | O_APPEND , 0600);
+
+dup2(fd1, STDIN_FILENO);
+dup2(fd2, STDOUT_FILENO);
+execl("/bin/sort","sort","-n","+4",NULL);
+close(fd1);
+
+
+
+close(fd2);
+
+//execl("/bin/sort","sort","-n","+4",NULL);
+}
+
+
+
+void redirection5(char file[]){//>> operation
+
+		int fd;
+
+		fd = open(file,O_WRONLY | O_CREAT | O_APPEND , 0600 );
+
+		if (fd == -1) {
+			perror("Failed to open my.file");
+			return ;
+		}
+
+		if (dup2(fd, STDOUT_FILENO) == -1) {
+			perror("Failed to redirect standard output");
+			return ;
+		}
+
+		if (close(fd) == -1) {
+			perror("Failed to close the file");
+			return ;
+		}
+		execl("/bin/ls","ls",NULL);
+ }
+
+*/
+
+
+
+
+
+
+
+
 
 
 /* The setup function below will not return any value, but it will just: read
@@ -188,7 +320,7 @@ void setup(char inputBuffer[], char *args[],int *background,int *argnum)
         exit(-1);           /* terminate with error code of -1 */
     }
 
-    printf(">>%s<<",inputBuffer);
+    //printf(">>%s<<",inputBuffer);
     for (i=0;i<length;i++){ /* examine every character in the inputBuffer */
 
         switch (inputBuffer[i]){
@@ -223,8 +355,8 @@ void setup(char inputBuffer[], char *args[],int *background,int *argnum)
     }    /* end of for */
     args[ct] = NULL; /* just in case the input line was > 80 */
     *argnum=ct;
-    for (i = 0; i <= ct; i++)
-        printf("args %d = %s\n",i,args[i]);
+    //for (i = 0; i <= ct; i++)
+        //printf("args %d = %s\n",i,args[i]);
 } /* end of setup routine */
 
 
@@ -279,7 +411,7 @@ int main(void){
         fflush(stdout);
         setup(inputBuffer, args, &background,&argnum);
         /*setup() calls exit() when Control-D is entered */
-        printf("----%d----\n",background);
+        //printf("----%d----\n",background);
 
         char *paths = getenv("PATH");
         char *dup =strdup(getenv("PATH"));
@@ -306,14 +438,14 @@ int main(void){
                 }
             }//--for
             // command concat
-            printf("helooo");
-            printf("%d %d  %d----", begin, end, countt);
+            //printf("helooo");
+            //printf("%d %d  %d----", begin, end, countt);
             if (countt == 2) {
                 strcpy(str, args[begin]);
                 for (int w = begin + 1; w <= end; w++) {
                     strcat(str, " ");
                     strcat(str, args[w]);
-                    printf("\n%s*****\n", str);
+                    //printf("\n%s*****\n", str);
                 }
                 // get alias name
                 if (countt == 2 && argnum - end - 1 == 1){ // everyting is okay commands are like "ls -l" list
@@ -332,7 +464,7 @@ int main(void){
 
             case 1: // varsa sokma test et , ---alias--> alias "ls -l" list
                 if (oki) { push(&head, args[argnum - 1], str); } // oki nonzero if everything is ok
-                printf("Im here \n");
+                //printf("Im here \n");
                 //printList(head);
 
                 break;
@@ -354,31 +486,31 @@ int main(void){
                 return 1;
             }
             if (childpid != 0) {
-                printf("I am parent %d, my child is %d\n", getpid(), childpid);
+               // printf("I am parent %d, my child is %d\n", getpid(), childpid);
                 if (background == 0) { // this is foreground process
                     waitpid(childpid, NULL, 0); // WAİT FOR CHİLD PROCESS TO JOİN WİTH THİS PARENT
                     //while(wait(NULL)>0);
                     if (pressCount)
                         kill(childpid, SIGKILL);
                 } else { // this is background process
-                    printback(backproc);
-                    printf("\n");
+                    //printback(backproc);
+                    //printf("\n");
                     insert(&backproc, childpid);
-                    printf("back process list:  ");
-                    printback(backproc);
-                    printf("\n");
+                    //printf("back process list:  ");
+                    //printback(backproc);
+                    //printf("\n");
 
                 }
                 if (strcmp(args[0], "fg") == 0) {
                     while (backproc != NULL) { // baktığım node u siliyorum
                         //printf(" %d ", node->data);
-                        printback(backproc);
-                        printf("will be waited %d ", backproc->id);
+                        //printback(backproc);
+                        //printf("will be waited %d ", backproc->id);
                         int bbb = backproc->id;
                         waitpid(bbb, NULL, 0);
                         deleteback(&backproc, backproc->id);
-                        printf("after  ");
-                        printback(backproc);
+                        //printf("after  ");
+                        //printback(backproc);
                         //back = back->next;
                         //while(wait(NULL)>0);
                     }
@@ -390,13 +522,13 @@ int main(void){
                         printf("There are background processes . You should terminate all process... \n");
                         while (backproc != NULL) { // baktığım node u siliyorum
                             //printf(" %d ", node->data);
-                            printback(backproc);
-                            printf("will be waited %d ", backproc->id);
+                            //printback(backproc);
+                            //printf("will be waited %d ", backproc->id);
                             int bbb = backproc->id;
                             waitpid(bbb, NULL, 0);
                             deleteback(&backproc, backproc->id);
-                            printf("after  ");
-                            printback(backproc);
+                           // printf("after  ");
+                            //printback(backproc);
                             //back = back->next;
                             //while(wait(NULL)>0);
                         }
@@ -419,7 +551,7 @@ int main(void){
                         system("clear");
                         break;
                     case 6:
-                        printf("I m here---");
+                        //printf("I m here---");
                         // ------------if user enter built in command we will find path for command en "execl" execute it
                         //case 7: // background processsler linked listte
                         //waitpid linked list elemanlarını bekle
@@ -448,17 +580,17 @@ int main(void){
                         if (err == -1) {  // command sistemde yok demek ,
                             //printf("Command is not found\n"); //kendi listemiste arayacaz
                             findNode(head, args[0], x); // x: command to execute with system call
-                            printf("\n%s\n", x);
+                            //printf("\n%s\n", x);
                             // char command[100];
                             //strcpy( command,x );
-                            printf("%s\n", x);
-                            printf("%s\n", com);
+                            //printf("%s\n", x);
+                            //printf("%s\n", com);
                             char *l = "\"";
                             strcpy(com, l);
                             strcat(com, x);
                             strcat(com, l);
                             int b = system(com);
-                            if (b != 0) { printf("Command is not found!"); }
+                            if (b != 0) { printf("Command is not found!\n"); }
                         }
 
 
