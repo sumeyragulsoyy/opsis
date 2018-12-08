@@ -285,47 +285,91 @@ int main(void){
         char *dup =strdup(getenv("PATH"));
         char *s=dup;
         char *p=NULL;
-//--------------------------------------------------------
-        childpid = fork();
-        if (childpid == -1) {
-            perror("Failed to fork");
-            return 1;
-        }
-        if(childpid !=0){
-            printf("I am parent %d, my child is %d\n",getpid(),childpid);
-            if(background == 0) { // this is foreground process
-                waitpid(childpid, NULL, 0); // WAİT FOR CHİLD PROCESS TO JOİN WİTH THİS PARENT
-                //while(wait(NULL)>0);
-                if(pressCount)
-                    kill(childpid,SIGKILL);
-            }else{ // this is background process
-                printback(backproc);
-                printf("\n");
-                insert(&backproc,childpid);
-                printf("back process list:  ");
-                printback(backproc);
-                printf("\n");
 
-            }
-            if (strcmp(args[0], "fg") == 0) {
-                while (backproc != NULL) { // baktığım node u siliyorum
-                    //printf(" %d ", node->data);
-                    printback(backproc);
-                    printf("will be waited %d ", backproc->id);
-                    int bbb = backproc->id;
-                    waitpid(bbb, NULL, 0);
-                    deleteback(&backproc, backproc->id);
-                    printf("after  ");
-                    printback(backproc);
-                    //back = back->next;
-                    //while(wait(NULL)>0);
+        //printf("I'm child %d, my parent is %d\n",getpid(),getppid());
+        // alias,unalias, alias -l
+        if (strcmp(args[0], "alias") == 0 && argnum > 2) { //----alias check----
+            flag = 1;
+            //printf("%d----",flag);
+            for (int j = 1; j < argnum; j++) {
+                ret = strchr(args[j], poppy);
+                //printf("%s----",ret);
+                if (ret != NULL) {
+                    countt++;
+                    if (countt == 1) {
+                        begin = j;
+                    } else if (countt == 2) {
+                        end = j;
+                    } else {
+                        printf("You entered command with incorrect syntax");
+                    }
+                }
+            }//--for
+            // command concat
+            printf("helooo");
+            printf("%d %d  %d----", begin, end, countt);
+            if (countt == 2) {
+                strcpy(str, args[begin]);
+                for (int w = begin + 1; w <= end; w++) {
+                    strcat(str, " ");
+                    strcat(str, args[w]);
+                    printf("\n%s*****\n", str);
+                }
+                // get alias name
+                if (countt == 2 && argnum - end - 1 == 1){ // everyting is okay commands are like "ls -l" list
+                    oki = 1;
                 }
 
             }
+            //----alias check if end----
+        } else if (strcmp(args[0], "unalias") == 0) { //---unalias check---
+            flag = 2;
+        } else if (strcmp(args[0], "alias") == 0 && strcmp(args[1], "-l") == 0) { //--alias -l check---
+            flag = 3;
+        }
 
-            if (strcmp(args[0], "exit") == 0){
-                if(backproc != NULL){
-                    printf("There are background processes . You should terminate all process... \n");
+        switch (flag) {
+
+            case 1: // varsa sokma test et , ---alias--> alias "ls -l" list
+                if (oki) { push(&head, args[argnum - 1], str); } // oki nonzero if everything is ok
+                printf("Im here \n");
+                //printList(head);
+
+                break;
+            case 2: // unalias , unalias list--> daha fazla input girerse kontrol lazım *argnum check yap
+                deleteNode(&head, args[1]);
+                break;
+            case 3: // alias -l
+                printList(head);
+                break;
+        }
+
+
+
+        if( !(strcmp(args[0], "unalias") == 0 || strcmp(args[0], "alias") == 0 )) {
+//--------------------------------------------------------
+            childpid = fork();
+            if (childpid == -1) {
+                perror("Failed to fork");
+                return 1;
+            }
+            if (childpid != 0) {
+                printf("I am parent %d, my child is %d\n", getpid(), childpid);
+                if (background == 0) { // this is foreground process
+                    waitpid(childpid, NULL, 0); // WAİT FOR CHİLD PROCESS TO JOİN WİTH THİS PARENT
+                    //while(wait(NULL)>0);
+                    if (pressCount)
+                        kill(childpid, SIGKILL);
+                } else { // this is background process
+                    printback(backproc);
+                    printf("\n");
+                    insert(&backproc, childpid);
+                    printf("back process list:  ");
+                    printback(backproc);
+                    printf("\n");
+
+                }
+                if (strcmp(args[0], "fg") == 0) {
                     while (backproc != NULL) { // baktığım node u siliyorum
                         //printf(" %d ", node->data);
                         printback(backproc);
@@ -339,82 +383,38 @@ int main(void){
                         //while(wait(NULL)>0);
                     }
 
-
                 }
-                exit(EXIT_SUCCESS);
-            }
-            if (strcmp(args[0], "alias") == 0 ){
-                    kill(childpid,SIGKILL);
 
-            }
-            if (strcmp(args[0], "unalias") == 0){
-                kill(childpid,SIGKILL);
-
-            }
-
-        }else{ //---
-
-                //printf("I'm child %d, my parent is %d\n",getpid(),getppid());
-                // alias,unalias, alias -l
-                if (strcmp(args[0], "alias") == 0 && argnum > 2) { //----alias check----
-                    flag = 1;
-                    //printf("%d----",flag);
-                    for (int j = 1; j < argnum; j++) {
-                        ret = strchr(args[j], poppy);
-                        //printf("%s----",ret);
-                        if (ret != NULL) {
-                            countt++;
-                            if (countt == 1) {
-                                begin = j;
-                            } else if (countt == 2) {
-                                end = j;
-                            } else {
-                                printf("You entered command with incorrect syntax");
-                            }
+                if (strcmp(args[0], "exit") == 0) {
+                    if (backproc != NULL) {
+                        printf("There are background processes . You should terminate all process... \n");
+                        while (backproc != NULL) { // baktığım node u siliyorum
+                            //printf(" %d ", node->data);
+                            printback(backproc);
+                            printf("will be waited %d ", backproc->id);
+                            int bbb = backproc->id;
+                            waitpid(bbb, NULL, 0);
+                            deleteback(&backproc, backproc->id);
+                            printf("after  ");
+                            printback(backproc);
+                            //back = back->next;
+                            //while(wait(NULL)>0);
                         }
-                    }//--for
-                    // command concat
-                    printf("helooo");
-                    printf("%d %d  %d----", begin, end, countt);
-                    if (countt == 2) {
-                        strcpy(str, args[begin]);
-                        for (int w = begin + 1; w <= end; w++) {
-                            strcat(str, " ");
-                            strcat(str, args[w]);
-                            printf("\n%s*****\n", str);
-                        }
-                        // get alias name
-                        if (countt == 2 && argnum - end - 1 == 1){ // everyting is okay commands are like "ls -l" list
-                            oki = 1;
-                        }
+
 
                     }
-                    //----alias check if end----
-                } else if (strcmp(args[0], "unalias") == 0) { //---unalias check---
-                    flag = 2;
-                } else if (strcmp(args[0], "alias") == 0 && strcmp(args[1], "-l") == 0) { //--alias -l check---
-                    flag = 3;
-                }else if(strcmp(args[0], "fg") == 0){
+                    exit(EXIT_SUCCESS);
+                }
+            } else { //---
+
+                if (strcmp(args[0], "fg") == 0) {
                     break;
-                }else if (strcmp(args[0], "clr") == 0) {
+                } else if (strcmp(args[0], "clr") == 0) {
                     flag = 5;
-                }else if (strcmp(args[0], "exit") == 0){
+                } else if (strcmp(args[0], "exit") == 0) {
                     break;
                 }
-
                 switch (flag) {
-
-                    case 1: // varsa sokma test et , ---alias--> alias "ls -l" list
-                        if (oki) { push(&head, args[argnum - 1], str); } // oki nonzero if everything is ok
-                        printf("Im here \n");
-                        //printList(head);
-                        break;
-                    case 2: // unalias , unalias list--> daha fazla input girerse kontrol lazım *argnum check yap
-                        deleteNode(&head, args[1]);
-                        break;
-                    case 3: // alias -l
-                        printList(head);
-                        break;
                     case 5:
                         system("clear");
                         break;
@@ -434,15 +434,15 @@ int main(void){
                             strcat(ppath, s);
                             strcat(ppath, "/");
                             strcat(ppath, args[0]);
-                                while(pressCount<1) {
-                                    err = execl(ppath, args[0], args[1], args[2], args[3], args[4], NULL);
-                                    break;
-                                }
-                                if (err == -1) {
-                                    s = p + 1;
-                                } else {
-                                    break;
-                                }
+                            while (pressCount < 1) {
+                                err = execl(ppath, args[0], args[1], args[2], args[3], args[4], NULL);
+                                break;
+                            }
+                            if (err == -1) {
+                                s = p + 1;
+                            } else {
+                                break;
+                            }
 
                         } while (p != NULL);//-----------------
                         if (err == -1) {  // command sistemde yok demek ,
@@ -465,8 +465,8 @@ int main(void){
                 } // end switch
 
 
-            }
-
+            } // else sonu
+        }
         }//-----
     }//---
 
